@@ -1,12 +1,13 @@
 class RecipesController < ApplicationController
   before_action :set_recipe, only: [:show, :update, :destroy]
-  before_action :set_user, only: [:index, :create]
+  # before_action :set_user, only: [:index, :create]
   
   # GET /recipes
   def index
-    if @user
-      @recipes = Recipe.includes(:user).references(:user)
-      render json: @recipes
+    user = User.find_by(id: session[:user_id])
+    if user
+      recipes = Recipe.all
+      render json: recipes
     else
       render json: { errors: ["You must be logged in."] }, status: 401
     end
@@ -19,8 +20,9 @@ class RecipesController < ApplicationController
 
   # POST /recipes
   def create
-    if @user
-      @recipe = @user.recipes.create(recipe_params)
+    user = User.find_by(id: session[:user_id])
+    if user
+      @recipe = user.recipes.create(recipe_params)
 
       if @recipe.save
         render json: @recipe, status: :created, location: @recipe
